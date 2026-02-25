@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ru" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Азкары">
+<title>Утренние Азкары</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #0f1a12;
+    --bg2: #162019;
+    --card: #1a2a1e;
+    --card2: #0e1810;
+    --accent: #5dbea3;
+    --accent2: #3d9e82;
+    --gold: #c9a84c;
+    --gold2: #a87e2e;
+    --text: #e8f0ea;
+    --text2: #9bbfaa;
+    --text3: #6a9478;
+    --border: rgba(93,190,163,0.15);
+    --shadow: rgba(0,0,0,0.6);
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: var(--bg);
+    font-family: 'Nunito', sans-serif;
+    color: var(--text);
+  }
+
+  /* Background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: 
+      radial-gradient(ellipse at 20% 20%, rgba(93,190,163,0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.04) 0%, transparent 50%),
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%235dbea3' fill-opacity='0.03'%3E%3Cpath d='M30 0L60 30L30 60L0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    max-width: 430px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    padding: 52px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-title {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text3);
+  }
+
+  .header-counter {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(93,190,163,0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid rgba(93,190,163,0.2);
+  }
+
+  /* Dots */
+  .dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 20px;
+    flex-wrap: wrap;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(93,190,163,0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .dot.active {
+    background: var(--accent);
+    width: 18px;
+    border-radius: 3px;
+  }
+
+  /* Swiper area */
+  .swiper-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    padding: 8px 16px 0;
+  }
+
+  .cards-container {
+    display: flex;
+    height: 100%;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+
+  .card {
+    min-width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .card-inner {
+    background: linear-gradient(160deg, #1e2f22 0%, #131f16 100%);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 24px 22px 20px;
+    flex: 1;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 1px 0 rgba(93,190,163,0.1);
+    scrollbar-width: none;
+  }
+
+  .card-inner::-webkit-scrollbar { display: none; }
+
+  /* Decorative corner */
+  .card-inner::before {
+    content: '☽';
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 18px;
+    color: rgba(201,168,76,0.3);
+  }
+
+  .card-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .arabic-text {
+    font-family: 'Amiri', serif;
+    font-size: 28px;
+    line-height: 1.9;
+    text-align: center;
+    direction: rtl;
+    color: var(--accent);
+    margin: 16px 0 20px;
+    text-shadow: 0 0 40px rgba(93,190,163,0.3);
+  }
+
+  .divider {
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 0 auto 16px;
+    border-radius: 2px;
+  }
+
+  .transcription {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.7;
+    color: var(--text2);
+    text-align: center;
+    font-style: italic;
+    margin-bottom: 14px;
+  }
+
+  .divider2 {
+    width: 30px;
+    height: 1px;
+    background: rgba(93,190,163,0.2);
+    margin: 0 auto 14px;
+  }
+
+  .translation {
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: 1.75;
+    color: var(--text3);
+    text-align: center;
+  }
+
+  /* Counter section */
+  .counter-section {
+    background: linear-gradient(160deg, #111b13 0%, #0c1510 100%);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    margin-top: 10px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .counter-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .counter-num {
+    font-size: 44px;
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    transition: transform 0.1s ease;
+  }
+
+  .counter-num.bump {
+    transform: scale(1.15);
+  }
+
+  .counter-target {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 1px;
+  }
+
+  .counter-btn {
+    flex: 1;
+    height: 56px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 16px;
+    color: #0a1a0e;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s ease;
+    box-shadow: 0 4px 20px rgba(93,190,163,0.3);
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .counter-btn:active {
+    transform: scale(0.96);
+    box-shadow: 0 2px 10px rgba(93,190,163,0.2);
+  }
+
+  .counter-btn.done {
+    background: linear-gradient(135deg, var(--gold2), var(--gold));
+    box-shadow: 0 4px 20px rgba(201,168,76,0.3);
+  }
+
+  .reset-btn {
+    width: 44px;
+    height: 44px;
+    background: rgba(93,190,163,0.08);
+    border: 1px solid rgba(93,190,163,0.15);
+    border-radius: 12px;
+    color: var(--text3);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .reset-btn:active { transform: scale(0.92); }
+
+  /* Progress ring */
+  .progress-ring {
+    width: 60px;
+    height: 60px;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .progress-ring svg {
+    transform: rotate(-90deg);
+  }
+
+  .progress-ring .track {
+    fill: none;
+    stroke: rgba(93,190,163,0.1);
+    stroke-width: 4;
+  }
+
+  .progress-ring .fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.3s ease;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px 32px;
+    gap: 12px;
+  }
+
+  .nav-btn {
+    width: 48px;
+    height: 48px;
+    background: rgba(93,190,163,0.08);
+    border: 1px solid rgba(93,190,163,0.15);
+    border-radius: 14px;
+    color: var(--text2);
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .nav-btn:active { transform: scale(0.92); background: rgba(93,190,163,0.15); }
+  .nav-btn:disabled { opacity: 0.3; pointer-events: none; }
+
+  .nav-center {
+    font-size: 12px;
+    color: var(--text3);
+    text-align: center;
+    flex: 1;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* No counter indicator */
+  .no-counter {
+    text-align: center;
+    padding: 12px;
+    color: var(--text3);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  /* Ripple effect */
+  @keyframes ripple {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* Slide animation */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card { animation: fadeIn 0.3s ease; }
+
+  /* Progress bar top */
+  .progress-bar-top {
+    height: 2px;
+    background: rgba(93,190,163,0.1);
+    margin: 0 16px 6px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <span class="header-title">Утренние Азкары</span>
+    <span class="header-counter" id="headerCounter">1 / 14</span>
+  </div>
+
+  <div class="progress-bar-top">
+    <div class="progress-bar-fill" id="progressBarFill" style="width: 7.14%"></div>
+  </div>
+
+  <div class="dots" id="dots"></div>
+
+  <div class="swiper-wrapper" id="swiperWrapper">
+    <div class="cards-container" id="cardsContainer"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn" id="prevBtn" onclick="navigate(-1)">‹</button>
+    <div class="nav-center" id="navLabel">Нажмите для счёта</div>
+    <button class="nav-btn" id="nextBtn" onclick="navigate(1)">›</button>
+  </div>
+</div>
+
+<script>
+const items = [
+  {
+    id: 1,
+    title: "Саййидуль-Истигфар",
+    count: 1,
+    arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+    transcription: "Аллаахумма анта раббии, ляя иляаха илля анта, халякътании уа анаа 'абдук, уа анаа 'аля 'ахдика уа уа'дика мастата'т. А'узу бика мин шарри маа сана'т. Абуу'у ляка бини'матика 'аляййя, уа абуу'у бизанбии, фагфир лии. Фа иннаху ляя ягфируз-зунууба илля анта.",
+    translation: "О Аллах, Ты — мой Господь, нет божества кроме Тебя. Ты создал меня, и я — Твой раб. Я стараюсь соблюдать Твой завет и обещание насколько могу. Прибегаю к Тебе от зла того, что совершил. Признаю Твои милости ко мне и признаю свой грех. Прости меня, ведь никто не прощает грехи кроме Тебя."
+  },
+  {
+    id: 2,
+    title: "Утренний зикр",
+    count: 1,
+    arabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلّٰهِ، وَالْحَمْدُ لِلّٰهِ، لَا إِلٰهَ إِلَّا اللّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ. رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هٰذَا الْيَوْمِ وَخَيْرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هٰذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ. رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ.",
+    transcription: "Асбахнаа уа асбахаль-мульку лиллях, уаль-хамду лиллях, ляя иляаха илляЛлаху уахдаху ляя шарика лях, ляхуль-мульку уа ляхуль-хамд, уа хуа 'аля кулли шай'ин кадиир. Рабби ас'алука хайра маа фии хаазаль-йаум уа хайра маа ба'даху, уа а'узу бика мин шарри маа фии хаазаль-йаум уа шарри маа ба'даху. Рабби а'узу бика миналь-кясали уа суу'иль-кибар, рабби а'узу бика мин 'азаабин фин-наар уа 'азаабин филь-кабр.",
+    translation: "Мы встретили утро, и власть принадлежит Аллаху, и хвала Аллаху. Нет божества кроме Аллаха, Единого, у Которого нет сотоварища. Ему принадлежит власть и хвала, и Он способен на всё. Господь мой, прошу у Тебя блага этого дня и блага после него; и прибегаю к Тебе от зла этого дня и зла после него. Господь мой, прибегаю к Тебе от лени и плохой старости; Господь мой, прибегаю к Тебе от наказания в Огне и наказания в могиле."
+  },
+  {
+    id: 3,
+    title: "Субханаллахи уа бихамдихи",
+    count: 100,
+    arabic: "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+    transcription: "Субхааналлахи уа бихамдихи.",
+    translation: "Пречист Аллах и хвала Ему."
+  },
+  {
+    id: 4,
+    title: "Сура Аль-Ихляс (112)",
+    count: 3,
+    arabic: "قُلْ هُوَ ٱللَّهُ أَحَدٌ\nٱللَّهُ ٱلصَّمَدُ\nلَمْ يَلِدْ وَلَمْ يُولَدْ\nوَلَمْ يَكُن لَّهُۥ كُفُوًا أَحَدٌ",
+    transcription: "Куль хуваЛлаху ахада. Аллахус-самад. Лям ялид уа лям юляд. Уа лям якун ляху куфуан ахада.",
+    translation: "Скажи: Он — Аллах Единый. Аллах Самодостаточный. Он не родил и не был рождён. И нет никого равного Ему."
+  },
+  {
+    id: 5,
+    title: "Сура Аль-Фаляк (113)",
+    count: 3,
+    arabic: "قُلْ أَعُوذُ بِرَبِّ ٱلْفَلَقِ\nمِن شَرِّ مَا خَلَقَ\nوَمِن شَرِّ غَاسِقٍ إِذَا وَقَبَ\nوَمِن شَرِّ ٱلنَّفَّاثَاتِ فِي ٱلْعُقَدِ\nوَمِن شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+    transcription: "Куль а'узу бираббиль-фаляк. Мин шарри маа халяк. Уа мин шарри гаасикин изаа уакаб. Уа мин шаррин-наффаасаати филь-'укад. Уа мин шарри хаасидин изаа хасад.",
+    translation: "Скажи: прибегаю к защите Господа рассвета от зла того, что Он сотворил; от зла мрака, когда он наступает; от зла колдуний, дующих на узлы; и от зла завистника, когда он завидует."
+  },
+  {
+    id: 6,
+    title: "Сура Ан-Нас (114)",
+    count: 3,
+    arabic: "قُلْ أَعُوذُ بِرَبِّ ٱلنَّاسِ\nمَلِكِ ٱلنَّاسِ\nإِلَٰهِ ٱلنَّاسِ\nمِن شَرِّ ٱلْوَسْوَاسِ ٱلْخَنَّاسِ\nٱلَّذِي يُوَسْوِسُ فِي صُدُورِ ٱلنَّاسِ\nمِنَ ٱلْجِنَّةِ وَٱلنَّاسِ",
+    transcription: "Куль а'узу бираббин-наас. Маликин-наас. Иляахин-наас. Мин шарриль-уасуаасиль-ханнаас. Аллязии юуасуису фии судуурин-наас. Миналь-джиннати уан-наас.",
+    translation: "Скажи: прибегаю к защите Господа людей, Царя людей, Бога людей — от зла наущающего, исчезающего, который наущает в груди людей, от джиннов и людей."
+  },
+  {
+    id: 7,
+    title: "Аллаахумма иннии ас'алюкаль-'аафията",
+    count: 1,
+    arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي. اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي. اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي.",
+    transcription: "Аллаахумма иннии ас'алюкаль-'аафията фид-дунйаа уаль-аахира. Аллаахумма иннии ас'алюкаль-'афуа уаль-'аафията фии диинии уа дуняайа уа ахлии уа маалии. Аллаахумма-стур 'аураатии уа аамин рау'аатии. Аллаахумма-хфазнии мин байна йадаййа уа мин хальфии уа 'ан ямиинии уа 'ан шимаалии уа мин фаукыи, уа а'узу би'азаматика ан угтааля мин тахтии.",
+    translation: "О Аллах, прошу у Тебя благополучия в этом мире и в Последней жизни. О Аллах, прошу у Тебя прощения и благополучия в моей религии, в моей мирской жизни, в моей семье и моём имуществе. О Аллах, прикрой мои недостатки и успокой мои страхи. О Аллах, охрани меня спереди, сзади, справа, слева и сверху; и прибегаю к Твоему величию, чтобы не быть погубленным снизу."
+  },
+  {
+    id: 8,
+    title: "Утренний зикр 2",
+    count: 1,
+    arabic: "اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ",
+    transcription: "Аллаахумма бика асбахнаа уа бика амсайнаа, уа бика нахйаа уа бика намуут, уа иляйкан-нушуур.",
+    translation: "О Аллах, благодаря Тебе мы встречаем утро и благодаря Тебе встречаем вечер; с помощью Тебя мы живём и с помощью Тебя умираем, и к Тебе — воскресение."
+  },
+  {
+    id: 9,
+    title: "Аллаахумма 'аалималь-гойби",
+    count: 1,
+    arabic: "اللَّهُمَّ عَالِمَ الْغَيْبِ وَالشَّهَادَةِ فَاطِرَ السَّمَاوَاتِ وَالْأَرْضِ، رَبَّ كُلِّ شَيْءٍ وَمَلِيكَهُ، أَشْهَدُ أَنْ لَا إِلٰهَ إِلَّا أَنْتَ، أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي وَمِنْ شَرِّ الشَّيْطَانِ وَشِرْكِهِ، وَأَنْ أَقْتَرِفَ عَلَىٰ نَفْسِي سُوءًا أَوْ أَجُرَّهُ إِلَىٰ مُسْلِمٍ",
+    transcription: "Аллаахумма 'аалималь-гойби уаш-шахаадати, фаатырос-самааваати уаль-ард, рабба кулли шай'ин уа маликах. Ашхаду ан ляя иляаха илля анта. А'узу бика мин шарри нафсии уа мин шарриш-шайтаани уа ширкых, уа ан актариф 'аля нафсии суу'ан ау аджурраху иля мусулман.",
+    translation: "О Аллах, Знающий сокровенное и явное, Творец небес и земли, Господь и Владыка всего. Свидетельствую: нет божества кроме Тебя. Прибегаю к Тебе от зла моей души и от зла шайтана и его многобожия, и чтобы не совершить зло против себя или не причинить его мусульманину."
+  },
+  {
+    id: 10,
+    title: "Бисмилляхиль-лязии ляя ядурру…",
+    count: 3,
+    arabic: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+    transcription: "Бисмилляхиль-лязии ляя ядурру ма'ас-михи шай'ун филь-арды уа ляя фис-самааи, уа хуас-самии'уль-'алиим.",
+    translation: "С именем Аллаха, с именем Которого ничто не причинит вреда ни на земле, ни на небе. Он — Слышащий, Знающий."
+  },
+  {
+    id: 11,
+    title: "Ляя иляаха илляЛлах, уахдаху…",
+    count: 10,
+    arabic: "لَا إِلٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+    transcription: "Ляя иляаха илляЛлаху уахдаху ляя шарика лях, ляхуль-мульку уа ляхуль-хамд, уа хуа 'аля кулли шай'ин кадиир.",
+    translation: "Нет божества кроме Аллаха, Единого, у Которого нет сотоварища. Ему принадлежит власть и хвала, и Он способен на всё."
+  },
+  {
+    id: 12,
+    title: "Радыту билляхи рабба…",
+    count: 3,
+    arabic: "رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا",
+    transcription: "Радыту билляхи рабба, уа бил-исляами диина, уа би-Мухаммадин салляЛлаху 'аляйхи уа салляма набиййа.",
+    translation: "Я доволен Аллахом как Господом, Исламом как религией и Мухаммадом (мир ему и благословение Аллаха) как пророком."
+  },
+  {
+    id: 13,
+    title: "Йа Хаййу йа Коййум",
+    count: 1,
+    arabic: "يَا حَيُّ يَا قَيُّومُ بِرَحْمَتِكَ أَسْتَغِيثُ، أَصْلِحْ لِي شَأْنِي كُلَّهُ، وَلَا تَكِلْنِي إِلَىٰ نَفْسِي طَرْفَةَ عَيْنٍ",
+    transcription: "Йа Хаййу йа Коййум, бирахматика астагиис, аслих лии ша'нии кулляху, уа ляя такильнии иля нафсии тарфата 'айн.",
+    translation: "О Живой, о Вечносущный! По Твоей милости прошу помощи. Исправь все мои дела и не оставляй меня наедине с собой даже на мгновение."
+  },
+  {
+    id: 14,
+    title: "Хасбийаллаху ляя иляаха илля хува",
+    count: 7,
+    arabic: "حَسْبِيَ اللَّهُ لَا إِلٰهَ إِلَّا هُوَ، عَلَيْهِ تَوَكَّلْتُ، وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ",
+    transcription: "Хасбийаллаху ляя иляаха илля хува, 'аляйхи тауаккальту, уа хуа раббуль-'аршиль-'азыим.",
+    translation: "Достаточен мне Аллах. Нет божества кроме Него. На Него я уповаю, и Он — Господь Великого Трона."
+  }
+];
+
+let current = 0;
+let counters = new Array(items.length).fill(0);
+
+// Touch handling
+let touchStartX = 0;
+let touchStartY = 0;
+
+const container = document.getElementById('cardsContainer');
+const dotsEl = document.getElementById('dots');
+
+// Build dots
+items.forEach((_, i) => {
+  const d = document.createElement('div');
+  d.className = 'dot' + (i === 0 ? ' active' : '');
+  d.onclick = () => goTo(i);
+  dotsEl.appendChild(d);
+});
+
+// Build cards
+items.forEach((item, i) => {
+  const circumference = 2 * Math.PI * 26;
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <div class="card-inner">
+      <div class="card-label">${item.title}</div>
+      <div class="arabic-text">${item.arabic.replace(/\n/g, '<br>')}</div>
+      <div class="divider"></div>
+      <div class="transcription">${item.transcription}</div>
+      <div class="divider2"></div>
+      <div class="translation">${item.translation}</div>
+    </div>
+    <div class="counter-section">
+      <div class="progress-ring">
+        <svg width="60" height="60" viewBox="0 0 60 60">
+          <circle class="track" cx="30" cy="30" r="26"/>
+          <circle class="fill" id="ring${i}" cx="30" cy="30" r="26"
+            stroke-dasharray="${circumference}"
+            stroke-dashoffset="${circumference}"/>
+        </svg>
+      </div>
+      <div class="counter-left">
+        <div class="counter-num" id="num${i}">0</div>
+        <div class="counter-target">из ${item.count}</div>
+      </div>
+      <button class="counter-btn" id="btn${i}" onclick="tap(${i})">
+        ${item.count === 1 ? '✓ Прочитано' : '+ Засчитать'}
+      </button>
+      <button class="reset-btn" onclick="resetCounter(${i})">↺</button>
+    </div>
+  `;
+  container.appendChild(card);
+});
+
+function updateDots() {
+  document.querySelectorAll('.dot').forEach((d, i) => {
+    d.className = 'dot' + (i === current ? ' active' : '');
+  });
+}
+
+function updateHeader() {
+  document.getElementById('headerCounter').textContent = `${current + 1} / ${items.length}`;
+  document.getElementById('progressBarFill').style.width = `${((current + 1) / items.length) * 100}%`;
+  document.getElementById('prevBtn').disabled = current === 0;
+  document.getElementById('nextBtn').disabled = current === items.length - 1;
+  const item = items[current];
+  document.getElementById('navLabel').textContent = item.count > 1 ? `Цель: ${item.count} раз` : 'Читается 1 раз';
+}
+
+function tap(i) {
+  const item = items[i];
+  if (counters[i] >= item.count) return;
+  counters[i]++;
+  
+  const numEl = document.getElementById(`num${i}`);
+  numEl.textContent = counters[i];
+  numEl.classList.add('bump');
+  setTimeout(() => numEl.classList.remove('bump'), 100);
+
+  // Progress ring
+  const circumference = 2 * Math.PI * 26;
+  const progress = counters[i] / item.count;
+  const offset = circumference * (1 - progress);
+  document.getElementById(`ring${i}`).style.strokeDashoffset = offset;
+
+  // Done state
+  if (counters[i] >= item.count) {
+    const btn = document.getElementById(`btn${i}`);
+    btn.classList.add('done');
+    btn.textContent = '✓ Выполнено';
+    // Vibrate if supported
+    if (navigator.vibrate) navigator.vibrate(50);
+  }
+}
+
+function resetCounter(i) {
+  counters[i] = 0;
+  document.getElementById(`num${i}`).textContent = '0';
+  const circumference = 2 * Math.PI * 26;
+  document.getElementById(`ring${i}`).style.strokeDashoffset = circumference;
+  const btn = document.getElementById(`btn${i}`);
+  btn.classList.remove('done');
+  btn.textContent = items[i].count === 1 ? '✓ Прочитано' : '+ Засчитать';
+}
+
+function goTo(index) {
+  current = Math.max(0, Math.min(items.length - 1, index));
+  container.style.transform = `translateX(-${current * 100}%)`;
+  updateDots();
+  updateHeader();
+}
+
+function navigate(dir) {
+  goTo(current + dir);
+}
+
+// Touch swipe
+const wrapper = document.getElementById('swiperWrapper');
+wrapper.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+wrapper.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+    navigate(dx < 0 ? 1 : -1);
+  }
+}, { passive: true });
+
+// Keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'ArrowLeft') navigate(-1);
+  if (e.key === ' ') tap(current);
+});
+
+updateHeader();
+</script>
+</body>
+</html>
